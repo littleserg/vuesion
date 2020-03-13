@@ -3,6 +3,7 @@ orbs:
   node: circleci/node@1.1.6
 jobs:
   build:
+    working_directory: /app
     executor:
       name: node/default
     steps:
@@ -10,13 +11,18 @@ jobs:
       - node/with-cache:
           steps:
             - run: npm install
-            - run: npm ci
+            - run: npm run ci
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - /app
   deploy:
     working_directory: /app
     docker:
       - image: docker:17.05.0-ce-git
     steps:
-      - checkout
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - setup_remote_docker
       - run:
           name: Install dependencies
