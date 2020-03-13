@@ -18,32 +18,23 @@ jobs:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/app
-      - persist_to_workspace:
-          root: /root/app
-          path: .
   deploy:
     working_directory: ~/app
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: circleci/node:10-stretch
     steps:
       - restore_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-      - setup_remote_docker
-      - run:
-          name: Load Docker image layer cache
-          command: |
-            set +o pipefail
-            docker load -i ~/caches/app.tar | true
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Build application Docker image
-          command: |
-            pwd
-            docker build -t vuesion .
-      - run:
-          name: Save Docker image layer cache
-          command: |
-            mkdir -p ~/caches
-            docker save -o ~/caches/app.tar vuesion
+          command: docker build -t vuesion .
+#      - run:
+#          name: Save Docker image layer cache
+#          command: |
+#            mkdir -p ~/caches
+#            docker save -o ~/caches/app.tar vuesion
 #      - save_cache:
 #          key: v1-{{ .Branch }}-{{ epoch }}
 #          paths:
