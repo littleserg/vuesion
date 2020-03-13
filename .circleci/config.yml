@@ -3,7 +3,7 @@ orbs:
   node: circleci/node@1.1.6
 jobs:
   build:
-    working_directory: ~/app
+    working_directory: /root/app
     executor:
       name: node/default
     steps:
@@ -17,7 +17,10 @@ jobs:
       - save_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
-            - ~/app
+            - /root/app
+      - persist_to_workspace:
+          root: /root/app
+          path: .
   deploy:
     working_directory: ~/app
     docker:
