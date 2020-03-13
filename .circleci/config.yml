@@ -8,6 +8,8 @@ jobs:
       name: node/default
     steps:
       - checkout
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - node/with-cache:
           steps:
             - run: npm install
@@ -21,6 +23,7 @@ jobs:
     docker:
       - image: docker:17.05.0-ce-git
     steps:
+      - checkout
       - restore_cache:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - setup_remote_docker
