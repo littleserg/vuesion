@@ -39,31 +39,28 @@ jobs:
       - run:
           name: Build application Docker image
           command: |
-            docker build --cache-from=app -t app .
+            docker build --cache-from=vuesion -t vuesion .
       - run:
           name: Save Docker image layer cache
           command: |
             mkdir -p /caches
-            docker save -o /caches/app.tar app
+            docker save -o /caches/app.tar vuesion
       - save_cache:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/app.tar
-      - run:
-          name: Run tests
-          command: |
-            docker-compose -f ./docker-compose.test.yml up
       - deploy:
           name: Push application Docker image
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              login="$(aws ecr get-login)"
-              ${login}
-              docker tag app "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-              docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-            fi
+            docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+            docker tag vuesion "${DOCKER_USER}/vuesion:${CIRCLE_SHA1}"
+            docker push "${DOCKER_USER}/vuesion:${CIRCLE_SHA1}"
+
 
 workflows:
     build-and-test:
       jobs:
         - build
+        - deploy:
+            requires:
+              - build
