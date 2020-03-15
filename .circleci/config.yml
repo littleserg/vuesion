@@ -78,6 +78,7 @@ workflows:
           cluster-name: eks
       - aws-eks/update-container-image:
           cluster-name: eks
+          aws-region: us-east-1
           container-image-updates: 'showcase=littleserg/vuesion:${CIRCLE_SHA1}'
           post-steps:
             - kubernetes/delete-resource:
