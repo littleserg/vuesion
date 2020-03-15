@@ -64,7 +64,7 @@ jobs:
       - kubernetes/create-or-update-resource:
           get-rollout-status: true
           resource-file-path: k8s/deployment.yml
-          resource-name: showcase
+          resource-name: deployment/showcase
 
 workflows:
   build-and-test:
@@ -81,12 +81,6 @@ workflows:
           cluster-name: eks
           aws-region: us-east-1
           container-image-updates: 'showcase=littleserg/vuesion:${CIRCLE_SHA1}'
-          post-steps:
-            - kubernetes/delete-resource:
-                resource-names: showcase
-                resource-types: deployment
-                wait: true
-          record: true
           requires:
             - create-deployment
-          resource-name: showcase
+          resource-name: deployment/showcase
