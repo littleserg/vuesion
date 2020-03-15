@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "showcase"
+spec:
+  selector:
+    matchLabels:
+      app: "showcase"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "showcase"
+    spec:
+      containers:
+        - image: littleserg/vuesion:f3d92dfd29b1642b29bd8b76a18b8f9b5e8877a8
+          imagePullPolicy: Always
+          name: "showcase"
+          ports:
+            - containerPort: 80
