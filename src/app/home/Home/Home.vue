@@ -5,7 +5,7 @@
       image="https://images.unsplash.com/photo-1549082984-1323b94df9a6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=512&q=60"
       alternative
     >
-      <vue-headline level="2">Developer Experience</vue-headline>
+      <vue-headline level="2">Developer Experience UPDATE</vue-headline>
       <br />
       <vue-headline level="3">Quick scaffolding</vue-headline>
       <p>Create components, VueX connected components, modules - and their tests - right from the CLI!</p>
