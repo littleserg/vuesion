@@ -37,10 +37,10 @@ jobs:
           command: |
             mkdir -p ~/caches
             docker save -o ~/caches/app.tar vuesion
-#      - save_cache:
-#          key: v1-{{ .Branch }}-{{ epoch }}
-#          paths:
-#            - /caches/app.tar
+      #      - save_cache:
+      #          key: v1-{{ .Branch }}-{{ epoch }}
+      #          paths:
+      #            - /caches/app.tar
       - deploy:
           name: Push application Docker image
           command: |
@@ -48,7 +48,8 @@ jobs:
             docker tag vuesion "${DOCKER_USER}/vuesion:${CIRCLE_SHA1}"
             docker push "${DOCKER_USER}/vuesion:${CIRCLE_SHA1}"
   create-deployment:
-    executor: aws-eks/python3
+    executor:
+      name: aws-eks/python3
     parameters:
       cluster-name:
         description: |
@@ -65,24 +66,25 @@ jobs:
           resource-name: showcase
 
 workflows:
-    build-and-test:
-      jobs:
-        - build
-        - deploy:
-            requires:
-              - build
-        - create-deployment:
-            requires: deploy
-            cluster-name: eks-demo-deployment
-        - aws-eks/update-container-image:
-            cluster-name: eks
-            container-image-updates: 'showcase=littleserg/vuesion:${CIRCLE_SHA1}'
-            post-steps:
-              - kubernetes/delete-resource:
-                  resource-names: showcase
-                  resource-types: deployment
-                  wait: true
-            record: true
-            requires:
-              - create-deployment
-            resource-name: showcase
+  build-and-test:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+      - create-deployment:
+          requires:
+            - deploy
+          cluster-name: eks
+      - aws-eks/update-container-image:
+          cluster-name: eks
+          container-image-updates: 'showcase=littleserg/vuesion:${CIRCLE_SHA1}'
+          post-steps:
+            - kubernetes/delete-resource:
+                resource-names: showcase
+                resource-types: deployment
+                wait: true
+          record: true
+          requires:
+            - create-deployment
+          resource-name: showcase
