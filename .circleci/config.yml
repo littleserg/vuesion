@@ -5,14 +5,12 @@ orbs:
   kubernetes: circleci/kubernetes@0.4.0
 
 jobs:
-  build:
+  build-and-test:
     working_directory: ~/app
     executor:
       name: node/default
     steps:
       - checkout
-      - restore_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - node/with-cache:
           steps:
             - run: npm install
@@ -21,7 +19,7 @@ jobs:
           key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/app
-  deploy:
+  prepare-docker:
     working_directory: ~/app
     docker:
       - image: circleci/node:10-stretch
@@ -47,7 +45,7 @@ jobs:
             docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
             docker tag vuesion "${DOCKER_USER}/vuesion:${CIRCLE_SHA1}"
             docker push "${DOCKER_USER}/vuesion:${CIRCLE_SHA1}"
-  create-deployment:
+  create-eks-deployment:
     executor:
       name: aws-eks/python3
     parameters:
@@ -69,18 +67,18 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - build
-      - deploy:
+      - build-and-test
+      - prepare-docker:
           requires:
-            - build
-      - create-deployment:
+            - build-and-test
+      - create-eks-deployment:
           requires:
-            - deploy
+            - prepare-docker
           cluster-name: eks
       - aws-eks/update-container-image:
           cluster-name: eks
           aws-region: us-east-1
           container-image-updates: 'showcase=littleserg/vuesion:${CIRCLE_SHA1}'
           requires:
-            - create-deployment
+            - create-eks-deployment
           resource-name: deployment/showcase
